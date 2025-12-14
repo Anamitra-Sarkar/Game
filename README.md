@@ -1,6 +1,6 @@
-# Production-Grade WebGL 3D Character Viewer
+# Production-Grade WebGL 3D Game Scene
 
-A high-fidelity, real-world 3D character viewer built with Three.js, delivering production-quality PBR rendering entirely in the browser via WebGL.
+A high-fidelity, game-ready 3D scene built with Three.js, delivering production-quality PBR rendering entirely in the browser via WebGL.
 
 ## Quick Start
 
@@ -31,10 +31,11 @@ The server (Vite dev server) only serves static assets. All 3D rendering, lighti
 ├── package.json        # Dependencies and scripts
 ├── vite.config.js      # Vite build configuration
 ├── src/
-│   ├── main.js         # Application entry, initialization, camera setup
-│   ├── scene.js        # Scene construction, renderer config, controls
+│   ├── main.js         # Application entry, initialization, animation loop
+│   ├── scene.js        # Scene construction, renderer config, ground plane
 │   ├── lighting.js     # Lighting system (HDR environment, 3-point lighting)
-│   └── loader.js       # Model loading, processing, and centering
+│   ├── loader.js       # Model loading, processing, animations
+│   └── camera.js       # Camera controller (viewer/game modes)
 └── public/
     ├── model.glb       # Your 3D model (placeholder)
     ├── hdri.hdr        # HDR environment map (placeholder)
@@ -137,9 +138,41 @@ For best results, models should use:
 
 If no HDRI is provided, a procedural gradient environment is used as fallback.
 
+## Game-Ready Features
+
+### HDRI Background
+The HDR environment map is now visible as the scene background (not just for lighting), creating an immersive world feel.
+
+### PBR Ground Plane
+A physically-based ground plane with concrete/asphalt appearance that receives shadows and interacts realistically with lighting.
+
+### Animation System
+- Automatic detection of animations in GLTF models
+- AnimationMixer prepared and ready
+- Idle animation hook for future gameplay
+- Update loop integrated (animations not playing yet)
+
+### Camera Architecture
+Two camera modes supported:
+- **Viewer Mode** (active): OrbitControls for model inspection
+- **Game Mode** (prepared): Third-person follow camera with smooth lerp, ready for future gameplay activation
+
+### Scale Lock
+Character scale is automatically normalized and locked to prevent accidental resizing during gameplay implementation.
+
+### Debug Interface
+Access game systems via browser console:
+```javascript
+window.gameDebug.cameraController  // Camera system
+window.gameDebug.model             // Character model
+window.gameDebug.mixer             // Animation mixer
+window.gameDebug.CameraMode        // Camera modes enum
+```
+
 ## Known Limitations
 
-- **No Animation Playback**: Model animations are not played (static pose only)
+- **Animation Playback**: Animations detected but not playing (prepared for game mode)
+- **Camera Mode**: Currently in viewer mode; game mode prepared for future activation
 - **No Material Override**: Materials come from the GLTF; no runtime tweaking UI
 - **Single Model**: Designed for one model at a time; no scene composition
 - **Browser Dependent**: Quality depends on user's GPU and WebGL capabilities

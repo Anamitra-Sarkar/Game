@@ -2,11 +2,16 @@ import * as THREE from 'three';
 import { initScene } from './scene.js';
 import { setupLighting } from './lighting.js';
 import { loadModel, setMaxAnisotropy } from './loader.js';
+import { CameraController, CameraMode } from './camera.js';
 
 const MODEL_PATH = '/model.glb';
 
 const tempVector1 = new THREE.Vector3();
 const tempVector2 = new THREE.Vector3();
+
+let cameraController = null;
+let mixer = null;
+const clock = new THREE.Clock();
 
 async function init() {
   const container = document.getElementById('canvas-container');
@@ -28,6 +33,9 @@ async function init() {
   try {
     const { scene, camera, renderer, controls, groundPlane } = initScene(container);
     
+    // Initialize camera controller
+    cameraController = new CameraController(camera, controls);
+    
     setMaxAnisotropy(renderer);
     
     await setupLighting(scene, renderer);
@@ -40,13 +48,42 @@ async function init() {
     if (model) {
       adjustCameraToModel(camera, controls, model);
       adjustGroundToModel(groundPlane, model);
+      
+      // Set model as camera target for future game mode
+      cameraController.setTarget(model);
+      
+      // Store mixer reference if animations exist
+      if (model.userData.hasAnimations) {
+        mixer = model.userData.mixer;
+      }
     }
 
     loadingOverlay.classList.add('hidden');
     
+    // Expose camera controller to window for debugging/testing
+    window.gameDebug = {
+      cameraController,
+      model,
+      mixer,
+      CameraMode
+    };
+    
     function animate() {
       requestAnimationFrame(animate);
+      
+      const deltaTime = clock.getDelta();
+      
+      // Update animation mixer if present
+      if (mixer) {
+        mixer.update(deltaTime);
+      }
+      
+      // Update camera based on current mode
+      cameraController.update(deltaTime);
+      
+      // Update orbit controls (only active in viewer mode)
       controls.update();
+      
       renderer.render(scene, camera);
     }
     

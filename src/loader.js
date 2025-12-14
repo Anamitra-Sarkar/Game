@@ -28,6 +28,9 @@ export async function loadModel(path, scene, onProgress) {
         processModel(model);
         centerAndScaleModel(model);
         
+        // Prepare animation system if animations exist
+        prepareAnimations(model, gltf.animations);
+        
         scene.add(model);
         
         dracoLoader.dispose();
@@ -47,6 +50,10 @@ export async function loadModel(path, scene, onProgress) {
         const fallbackModel = createFallbackModel();
         processModel(fallbackModel);
         centerAndScaleModel(fallbackModel);
+        
+        // Prepare animations for fallback model (will have none, but keeps structure consistent)
+        prepareAnimations(fallbackModel, []);
+        
         scene.add(fallbackModel);
         
         if (onProgress) onProgress(1);
@@ -149,6 +156,45 @@ function centerAndScaleModel(model) {
   model.userData.boundingBox = newBox;
   model.userData.originalSize = size;
   model.userData.appliedScale = scale;
+  
+  // Lock scale to prevent accidental resizing
+  model.userData.scaleLocked = true;
+}
+
+function prepareAnimations(model, animations) {
+  if (!animations || animations.length === 0) {
+    console.log('No animations found in model');
+    model.userData.hasAnimations = false;
+    return;
+  }
+  
+  console.log(`Found ${animations.length} animation(s):`, animations.map(a => a.name));
+  
+  // Create animation mixer
+  const mixer = new THREE.AnimationMixer(model);
+  
+  // Store animations and mixer in model userData
+  model.userData.mixer = mixer;
+  model.userData.animations = animations;
+  model.userData.hasAnimations = true;
+  model.userData.clips = {};
+  
+  // Index animations by name for easy access
+  animations.forEach(clip => {
+    model.userData.clips[clip.name || 'default'] = clip;
+  });
+  
+  // Find idle animation if it exists
+  const idleClip = animations.find(clip => 
+    /idle/i.test(clip.name)
+  );
+  
+  if (idleClip) {
+    console.log('Idle animation detected:', idleClip.name);
+    model.userData.idleClip = idleClip;
+  }
+  
+  // Note: Not playing animations yet - waiting for game mode activation
 }
 
 function createFallbackModel() {

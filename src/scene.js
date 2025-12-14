@@ -16,7 +16,9 @@ const SHADOW_MAP_SIZE = 2048;
 
 export function initScene(container) {
   const scene = new THREE.Scene();
-  scene.background = new THREE.Color(0x1a1a1a);
+  // Background will be set by lighting system (HDRI or fallback)
+  // Temporary dark background until HDRI loads
+  scene.background = new THREE.Color(0x0a0a0a);
 
   const width = container.clientWidth;
   const height = container.clientHeight;
@@ -58,15 +60,19 @@ export function initScene(container) {
 function createGroundPlane() {
   const geometry = new THREE.PlaneGeometry(1, 1);
   
-  const material = new THREE.ShadowMaterial({
-    opacity: 0.3,
-    transparent: true
+  // PBR ground material: neutral concrete/asphalt appearance
+  const material = new THREE.MeshStandardMaterial({
+    color: 0x3a3a3a,          // Dark neutral gray
+    roughness: 0.9,            // Non-reflective, matte surface
+    metalness: 0.0,            // Not metallic
+    envMapIntensity: 0.3       // Minimal environment reflections
   });
   
   const plane = new THREE.Mesh(geometry, material);
   plane.rotation.x = -Math.PI / 2;
   plane.position.y = 0;
   plane.receiveShadow = true;
+  plane.castShadow = false;
   
   return plane;
 }
