@@ -17,6 +17,12 @@ const CROSSFADE_DURATION = 0.25;  // Smooth transitions between animations
 const WALK_SPEED_THRESHOLD = 0.1;  // Minimum speed to trigger walk
 const RUN_SPEED_THRESHOLD = 4.0;   // Speed threshold for run animation
 
+// Animation speed scaling
+const MIN_WALK_SPEED_SCALE = 0.8;   // Minimum walk animation speed
+const MAX_WALK_SPEED_SCALE = 1.3;   // Maximum walk animation speed
+const WALK_SPEED_DIVISOR = 2.0;     // Divisor for walk speed calculation
+const MAX_RUN_SPEED_SCALE = 1.5;    // Maximum run animation speed
+
 export class AnimationController {
   constructor(model) {
     this.model = model;
@@ -104,11 +110,11 @@ export class AnimationController {
       if (speed > RUN_SPEED_THRESHOLD) {
         targetState = AnimationState.RUN;
         // Scale run animation speed with character speed
-        animationSpeed = Math.min(1.5, speed / RUN_SPEED_THRESHOLD);
+        animationSpeed = Math.min(MAX_RUN_SPEED_SCALE, speed / RUN_SPEED_THRESHOLD);
       } else {
         targetState = AnimationState.WALK;
         // Scale walk animation speed with character speed
-        animationSpeed = Math.max(0.8, Math.min(1.3, speed / 2.0));
+        animationSpeed = Math.max(MIN_WALK_SPEED_SCALE, Math.min(MAX_WALK_SPEED_SCALE, speed / WALK_SPEED_DIVISOR));
       }
     }
     
@@ -154,6 +160,16 @@ export class AnimationController {
   }
   
   /**
+   * Configure an animation action with standard settings
+   */
+  configureAction(action, speed = 1.0) {
+    action.setLoop(THREE.LoopRepeat);
+    action.clampWhenFinished = false;
+    action.setEffectiveTimeScale(speed);
+    return action;
+  }
+  
+  /**
    * Play an animation with smooth crossfade from current animation
    */
   playAnimation(clip, state, speed = 1.0) {
@@ -161,10 +177,8 @@ export class AnimationController {
     
     const newAction = this.mixer.clipAction(clip);
     
-    // Configure new action
-    newAction.setLoop(THREE.LoopRepeat);
-    newAction.clampWhenFinished = false;
-    newAction.setEffectiveTimeScale(speed);
+    // Configure new action with standard settings
+    this.configureAction(newAction, speed);
     
     // Smooth transition from current to new animation
     if (this.currentAction && this.currentAction !== newAction) {
