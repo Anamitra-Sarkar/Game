@@ -1,6 +1,6 @@
-# Production-Grade WebGL 3D Game Scene
+# Production-Grade WebGL 3D Game Prototype
 
-A high-fidelity, game-ready 3D scene built with Three.js, delivering production-quality PBR rendering entirely in the browser via WebGL.
+A playable third-person game prototype built with Three.js, delivering production-quality PBR rendering and smooth gameplay entirely in the browser via WebGL.
 
 ## Quick Start
 
@@ -9,7 +9,53 @@ npm install
 npm run dev
 ```
 
-Open the browser preview to view the 3D character.
+Open the browser preview. Click to lock mouse cursor, then use WASD to move and mouse to look around.
+
+## Controls
+
+- **Click canvas** - Enable camera control (pointer lock)
+- **W/A/S/D** - Move character
+- **Shift** - Sprint (faster movement)
+- **Mouse** - Rotate camera around character
+- **ESC** - Release camera control
+
+## What's New - Third-Person Game Prototype
+
+This is now a **playable game prototype** with the following features:
+
+### Character Movement
+- Frame-rate independent movement system
+- Camera-relative controls (WASD moves based on camera direction)
+- Character rotates smoothly to face movement direction
+- Walk and sprint speeds with smooth transitions
+
+### Third-Person Camera
+- Smooth follow camera with lerp interpolation
+- Mouse-controlled rotation around character
+- Camera stays behind and above character
+- Never goes below ground level
+- Pointer lock for immersive camera control
+
+### Animation System
+- Automatic animation detection and state management
+- Three animation states: Idle, Walk, Run
+- Smooth transitions between animation states based on movement speed
+- Graceful fallback for models without animations
+
+### World & Ground Alignment
+- Ground plane fixed at y = 0 (horizontal)
+- Large ground area (100x100 units) prevents visible edges
+- Distance fog for atmospheric effect
+- Vertex color falloff at ground edges for subtle blending
+- HDRI serves as visual skybox
+- Character properly grounded (not floating)
+
+### Modular Architecture
+- **input.js** - Keyboard and mouse input handling
+- **characterController.js** - Character movement, rotation, and animation logic
+- **gameCamera.js** - Third-person camera system
+- **world.js** - Ground plane and fog setup
+- Clean separation of concerns for future extensibility
 
 ## Architecture
 
@@ -44,6 +90,28 @@ The server (Vite dev server) only serves static assets. All 3D rendering, lighti
 ```
 
 ## Technical Implementation
+
+### Game Loop Architecture
+
+The game now uses a clean, modular game loop:
+
+```javascript
+function animate() {
+  const deltaTime = clock.getDelta();
+  
+  // 1. Process Input
+  // Input handled by InputManager
+  
+  // 2. Update Character
+  characterController.update(deltaTime, inputManager);
+  
+  // 3. Update Camera
+  gameCamera.update(deltaTime, inputManager);
+  
+  // 4. Render
+  renderer.render(scene, camera);
+}
+```
 
 ### Rendering Pipeline
 
@@ -105,16 +173,17 @@ The lighting is authored as a 3-point lighting setup commonly used in photograph
 - Scaled to fit within a consistent viewport size
 - Camera automatically framed to model dimensions
 
-## Comparison to Demo/Sandbox Implementations
+## Comparison to Viewer vs Game Prototype
 
-| Aspect | This Viewer | Typical Demo |
-|--------|-------------|--------------|
-| Lighting | Authored 3-point + HDR | Single ambient |
-| Tone Mapping | ACESFilmic, tuned | Default/none |
-| Color Space | Proper sRGB workflow | Often ignored |
-| Shadows | Soft PCF, high-res | Disabled/basic |
-| Materials | PBR with env reflections | Basic/unlit |
-| Code Structure | Modular, maintainable | Monolithic |
+| Aspect | Previous Viewer | Current Game Prototype |
+|--------|----------------|------------------------|
+| Controls | OrbitControls | WASD + Mouse (game-style) |
+| Camera | Free orbit | Third-person follow |
+| Movement | None | Full character control |
+| Animations | Detected only | Active state machine |
+| Ground | Scaled to model | Fixed at y=0, extended |
+| Fog | None | Distance fog enabled |
+| Mode | Inspection | Playable game |
 
 ## Replacing the Model
 
@@ -138,45 +207,43 @@ For best results, models should use:
 
 If no HDRI is provided, a procedural gradient environment is used as fallback.
 
-## Game-Ready Features
+## Game-Ready Features & Future Hooks
 
-### HDRI Background
-The HDR environment map is now visible as the scene background (not just for lighting), creating an immersive world feel.
+### Implemented
+- ✅ Character movement with WASD controls
+- ✅ Sprint functionality (Shift key)
+- ✅ Third-person camera with mouse look
+- ✅ Animation state machine (idle/walk/run)
+- ✅ Proper ground alignment at y=0
+- ✅ Distance fog and edge blending
+- ✅ Frame-rate independent updates
 
-### PBR Ground Plane
-A physically-based ground plane with concrete/asphalt appearance that receives shadows and interacts realistically with lighting.
-
-### Animation System
-- Automatic detection of animations in GLTF models
-- AnimationMixer prepared and ready
-- Idle animation hook for future gameplay
-- Update loop integrated (animations not playing yet)
-
-### Camera Architecture
-Two camera modes supported:
-- **Viewer Mode** (active): OrbitControls for model inspection
-- **Game Mode** (prepared): Third-person follow camera with smooth lerp, ready for future gameplay activation
-
-### Scale Lock
-Character scale is automatically normalized and locked to prevent accidental resizing during gameplay implementation.
+### Ready for Future Implementation
+- Hooks for physics engine integration
+- NPC spawning and management
+- Interaction system (prepared in architecture)
+- Additional game mechanics
+- Multiplayer support foundation
 
 ### Debug Interface
 Access game systems via browser console:
 ```javascript
-window.gameDebug.cameraController  // Camera system
-window.gameDebug.model             // Character model
-window.gameDebug.mixer             // Animation mixer
-window.gameDebug.CameraMode        // Camera modes enum
+window.gameDebug.inputManager         // Input system
+window.gameDebug.characterController  // Character controller
+window.gameDebug.gameCamera          // Camera system
+window.gameDebug.model               // Character model
+window.gameDebug.scene               // Three.js scene
+window.gameDebug.camera              // Three.js camera
 ```
 
 ## Known Limitations
 
-- **Animation Playback**: Animations detected but not playing (prepared for game mode)
-- **Camera Mode**: Currently in viewer mode; game mode prepared for future activation
-- **No Material Override**: Materials come from the GLTF; no runtime tweaking UI
-- **Single Model**: Designed for one model at a time; no scene composition
+- **Camera Collision**: Camera does not detect obstacles (prepared for future physics integration)
+- **Single Character**: Designed for one playable character
+- **No Physics**: Movement uses simple vector math; no gravity or collision yet
 - **Browser Dependent**: Quality depends on user's GPU and WebGL capabilities
 - **HDRI Size**: Large HDR files increase initial load time
+- **Pointer Lock**: Requires user interaction (click) to enable camera control
 
 ## Performance Considerations
 

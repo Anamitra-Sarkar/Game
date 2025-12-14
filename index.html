@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>WebGL Character Viewer</title>
+  <title>Third-Person Game Prototype</title>
   <style>
     * {
       margin: 0;
@@ -85,6 +85,55 @@
       display: none;
       z-index: 1001;
     }
+    
+    #controls-info {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      background-color: rgba(26, 26, 26, 0.8);
+      color: #fff;
+      padding: 16px;
+      border-radius: 8px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-size: 13px;
+      line-height: 1.6;
+      z-index: 1000;
+      pointer-events: none;
+      transition: opacity 0.3s ease-out;
+    }
+    
+    #controls-info.hidden {
+      opacity: 0;
+    }
+    
+    #controls-info h3 {
+      margin: 0 0 8px 0;
+      font-size: 14px;
+      font-weight: 600;
+      color: #4a9eff;
+    }
+    
+    #controls-info ul {
+      margin: 0;
+      padding-left: 0;
+      list-style: none;
+    }
+    
+    #controls-info li {
+      margin-bottom: 4px;
+      color: #ccc;
+    }
+    
+    #controls-info kbd {
+      display: inline-block;
+      padding: 2px 6px;
+      background-color: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 3px;
+      font-family: monospace;
+      font-size: 11px;
+      margin-right: 4px;
+    }
   </style>
 </head>
 <body>
@@ -94,6 +143,16 @@
     <div id="loading-text">Loading model...</div>
   </div>
   <div id="error-message"></div>
+  <div id="controls-info">
+    <h3>Controls</h3>
+    <ul>
+      <li><kbd>Click</kbd> to enable camera control</li>
+      <li><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> Move</li>
+      <li><kbd>Shift</kbd> Sprint</li>
+      <li><kbd>Mouse</kbd> Look around</li>
+      <li><kbd>ESC</kbd> Release camera</li>
+    </ul>
+  </div>
   <script type="module" src="/src/main.js"></script>
 </body>
 </html>

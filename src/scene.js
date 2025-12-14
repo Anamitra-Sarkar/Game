@@ -51,28 +51,5 @@ export function initScene(container) {
   controls.target.set(0, 0, 0);
   controls.update();
 
-  const groundPlane = createGroundPlane();
-  scene.add(groundPlane);
-
-  return { scene, camera, renderer, controls, groundPlane };
-}
-
-function createGroundPlane() {
-  const geometry = new THREE.PlaneGeometry(1, 1);
-  
-  // PBR ground material: neutral concrete/asphalt appearance
-  const material = new THREE.MeshStandardMaterial({
-    color: 0x3a3a3a,          // Dark neutral gray
-    roughness: 0.9,            // Non-reflective, matte surface
-    metalness: 0.0,            // Not metallic
-    envMapIntensity: 0.3       // Minimal environment reflections
-  });
-  
-  const plane = new THREE.Mesh(geometry, material);
-  plane.rotation.x = -Math.PI / 2;
-  plane.position.y = 0;
-  plane.receiveShadow = true;
-  plane.castShadow = false;
-  
-  return plane;
+  return { scene, camera, renderer, controls };
 }
