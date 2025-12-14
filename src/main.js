@@ -60,6 +60,14 @@ async function init() {
 
     loadingOverlay.classList.add('hidden');
     
+    // Expose camera controller to window for debugging/testing
+    window.gameDebug = {
+      cameraController,
+      model,
+      mixer,
+      CameraMode
+    };
+    
     function animate() {
       requestAnimationFrame(animate);
       
