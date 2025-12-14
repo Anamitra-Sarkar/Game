@@ -227,7 +227,7 @@ export class AnimationController {
     }
     
     // Find animations by common naming patterns
-    this.animationClips.idle = this.findAnimation(['idle', 'Idle', 'IDLE', 'standing', 'Standing', 'TPose', 'T-Pose']);
+    this.animationClips.idle = this.findAnimation(['idle', 'Idle', 'IDLE', 'standing', 'Standing', 'TPose', 'T-Pose', 'Survey', 'survey']);
     this.animationClips.walk = this.findAnimation(['walk', 'Walk', 'WALK', 'walking', 'Walking']);
     this.animationClips.run = this.findAnimation(['run', 'Run', 'RUN', 'running', 'Running', 'sprint', 'Sprint']);
     
