@@ -2,10 +2,19 @@ import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
 
+let maxAnisotropy = 4;
+
+export function setMaxAnisotropy(renderer) {
+  maxAnisotropy = Math.min(renderer.capabilities.getMaxAnisotropy(), 16);
+}
+
 export async function loadModel(path, scene, onProgress) {
   const loader = new GLTFLoader();
   
   const dracoLoader = new DRACOLoader();
+  // Using Google's CDN for DRACO decoders - this is the official distribution point
+  // recommended by the Draco team. For fully offline deployments, copy decoder files
+  // from node_modules/three/examples/jsm/libs/draco/ to public/draco/ and update path.
   dracoLoader.setDecoderPath('https://www.gstatic.com/draco/versioned/decoders/1.5.6/');
   dracoLoader.setDecoderConfig({ type: 'js' });
   loader.setDRACOLoader(dracoLoader);
@@ -117,7 +126,7 @@ function processSingleMaterial(material) {
 function ensureTextureSettings(texture) {
   if (!texture) return;
   
-  texture.anisotropy = 16;
+  texture.anisotropy = maxAnisotropy;
   texture.minFilter = THREE.LinearMipmapLinearFilter;
   texture.magFilter = THREE.LinearFilter;
   texture.generateMipmaps = true;

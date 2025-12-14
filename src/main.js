@@ -1,8 +1,12 @@
+import * as THREE from 'three';
 import { initScene } from './scene.js';
 import { setupLighting } from './lighting.js';
-import { loadModel } from './loader.js';
+import { loadModel, setMaxAnisotropy } from './loader.js';
 
 const MODEL_PATH = '/model.glb';
+
+const tempVector1 = new THREE.Vector3();
+const tempVector2 = new THREE.Vector3();
 
 async function init() {
   const container = document.getElementById('canvas-container');
@@ -23,6 +27,8 @@ async function init() {
 
   try {
     const { scene, camera, renderer, controls, groundPlane } = initScene(container);
+    
+    setMaxAnisotropy(renderer);
     
     await setupLighting(scene, renderer);
     updateLoadingProgress(0.3);
@@ -63,8 +69,8 @@ async function init() {
 
 function adjustCameraToModel(camera, controls, model) {
   const box = model.userData.boundingBox;
-  const size = box.getSize({ x: 0, y: 0, z: 0 });
-  const center = box.getCenter({ x: 0, y: 0, z: 0 });
+  const size = box.getSize(tempVector1);
+  const center = box.getCenter(tempVector2);
   
   const maxDim = Math.max(size.x, size.y, size.z);
   const fov = camera.fov * (Math.PI / 180);
@@ -89,8 +95,8 @@ function adjustGroundToModel(groundPlane, model) {
   if (!groundPlane || !model) return;
   
   const box = model.userData.boundingBox;
-  const size = box.getSize({ x: 0, y: 0, z: 0 });
-  const center = box.getCenter({ x: 0, y: 0, z: 0 });
+  const size = box.getSize(tempVector1);
+  const center = box.getCenter(tempVector2);
   
   const groundSize = Math.max(size.x, size.z) * 4;
   groundPlane.scale.set(groundSize, groundSize, 1);
