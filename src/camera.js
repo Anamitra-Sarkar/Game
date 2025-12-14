@@ -74,6 +74,9 @@ export class CameraController {
   updateGameCamera(deltaTime) {
     if (!this.target) return;
     
+    // Ensure world matrix is up to date
+    this.target.updateMatrixWorld(true);
+    
     // Get target position and rotation
     const targetPosition = this.target.getWorldPosition(this.tempVector1);
     const targetRotation = this.target.rotation;

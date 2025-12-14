@@ -50,6 +50,10 @@ export async function loadModel(path, scene, onProgress) {
         const fallbackModel = createFallbackModel();
         processModel(fallbackModel);
         centerAndScaleModel(fallbackModel);
+        
+        // Prepare animations for fallback model (will have none, but keeps structure consistent)
+        prepareAnimations(fallbackModel, []);
+        
         scene.add(fallbackModel);
         
         if (onProgress) onProgress(1);
