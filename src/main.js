@@ -9,6 +9,7 @@ import { createWorld } from './world.js';
 
 const MODEL_PATH = '/model.glb';
 const CONTROLS_INFO_FADE_DELAY = 8000;
+const MAX_DELTA_TIME = 0.1; // Clamp delta to 100ms to prevent physics/animation explosions
 
 const tempVector1 = new THREE.Vector3();
 const tempVector2 = new THREE.Vector3();
@@ -80,6 +81,7 @@ async function init() {
       inputManager,
       characterController,
       gameCamera,
+      animationController: characterController?.animationController,
       model,
       scene,
       camera
@@ -88,7 +90,9 @@ async function init() {
     function animate() {
       requestAnimationFrame(animate);
       
-      const deltaTime = clock.getDelta();
+      // Get delta time and clamp to prevent explosions on lag/tab switches
+      let deltaTime = clock.getDelta();
+      deltaTime = Math.min(deltaTime, MAX_DELTA_TIME);
       
       if (characterController && inputManager && gameCamera) {
         // Update character (movement + animations)
