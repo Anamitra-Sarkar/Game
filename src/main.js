@@ -50,10 +50,10 @@ async function init() {
     const { groundPlane } = createWorld(scene);
 
     if (model) {
-      // Position character at ground level (y = 0)
-      const box = model.userData.boundingBox;
-      const size = box.getSize(tempVector1);
-      model.position.y = size.y / 2;
+      // Position character so its feet are at ground level (y = 0)
+      // The model is already centered at y=0, so we need to lift it by half its height
+      model.userData.boundingBox.getSize(tempVector1);
+      model.position.y = tempVector1.y / 2;
       
       // Initialize game systems
       inputManager = new InputManager(renderer.domElement);

@@ -148,8 +148,9 @@ function centerAndScaleModel(model) {
   const targetSize = 2;
   const scale = maxDimension > 0 ? targetSize / maxDimension : 1;
   
+  // Center the model horizontally and at origin vertically
   model.position.sub(center);
-  model.position.y += size.y * scale / 2;
+  model.position.y = 0;  // Place at ground level (y = 0), will be adjusted in main.js
   model.scale.multiplyScalar(scale);
   
   const newBox = new THREE.Box3().setFromObject(model);

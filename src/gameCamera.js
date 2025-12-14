@@ -34,6 +34,8 @@ export class GameCamera {
     
     // Initialize camera position
     this.updateCameraPosition();
+    this.currentPosition.copy(this.desiredPosition);
+    this.camera.position.copy(this.currentPosition);
   }
   
   /**
