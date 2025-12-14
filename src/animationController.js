@@ -326,7 +326,8 @@ export class AnimationController {
    * Apply procedural bone offsets for added realism
    */
   applyProceduralOffsets(speed, deltaTime) {
-    if (!this.skeleton || deltaTime <= 0) return;
+    // Clamp deltaTime to prevent division issues
+    if (!this.skeleton || deltaTime <= 0 || deltaTime > 0.1) return;
     
     // Calculate character rotation velocity
     const currentRotation = this.model.rotation.y;

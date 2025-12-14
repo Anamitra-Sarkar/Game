@@ -10,8 +10,14 @@ import * as THREE from 'three';
 const SPRING_STIFFNESS = 15.0;
 const SPRING_DAMPING = 0.8;
 const MAX_DISPLACEMENT = 0.3;  // Clamp to avoid instability
+const MAX_DELTA_TIME = 0.1;    // Maximum deltaTime to prevent physics instability
 const VELOCITY_SCALE = 0.5;
 const ACCELERATION_SCALE = 0.3;
+
+// Bone detection keywords (module-level to avoid recreation)
+const HAIR_KEYWORDS = ['hair', 'ponytail', 'braid', 'strand'];
+const CLOTH_KEYWORDS = ['cloth', 'cape', 'skirt', 'scarf', 'ribbon', 'tie'];
+const UPPER_BODY_KEYWORDS = ['spine', 'chest', 'upperchest', 'neck'];
 
 // Secondary motion types
 export const SecondaryMotionType = {
@@ -52,7 +58,10 @@ class BoneSpring {
    * Update spring physics based on character motion
    */
   update(deltaTime, characterVelocity, characterAcceleration) {
-    if (deltaTime <= 0) return;
+    // Clamp deltaTime to prevent physics instability
+    if (deltaTime <= 0 || deltaTime > MAX_DELTA_TIME) {
+      deltaTime = 0.016; // Fallback to ~60fps
+    }
     
     // Calculate driving force from character motion
     const force = this.tempVector.set(0, 0, 0);
@@ -165,25 +174,20 @@ export class SecondaryMotionController {
     const clothBones = [];
     const upperBodyBones = [];
     
-    // Keywords for bone detection
-    const hairKeywords = ['hair', 'ponytail', 'braid', 'strand'];
-    const clothKeywords = ['cloth', 'cape', 'skirt', 'scarf', 'ribbon', 'tie'];
-    const upperBodyKeywords = ['spine', 'chest', 'upperchest', 'neck'];
-    
     this.model.traverse((object) => {
       if (object.isBone) {
         const name = object.name.toLowerCase();
         
         // Detect hair bones
-        if (hairKeywords.some(keyword => name.includes(keyword))) {
+        if (HAIR_KEYWORDS.some(keyword => name.includes(keyword))) {
           hairBones.push(object);
         }
         // Detect cloth/accessory bones
-        else if (clothKeywords.some(keyword => name.includes(keyword))) {
+        else if (CLOTH_KEYWORDS.some(keyword => name.includes(keyword))) {
           clothBones.push(object);
         }
         // Detect upper body bones for soft motion
-        else if (upperBodyKeywords.some(keyword => name.includes(keyword))) {
+        else if (UPPER_BODY_KEYWORDS.some(keyword => name.includes(keyword))) {
           upperBodyBones.push(object);
         }
       }
@@ -249,7 +253,10 @@ export class SecondaryMotionController {
    * Calculate character velocity and acceleration from position
    */
   updateCharacterMotion(deltaTime) {
-    if (deltaTime <= 0) return;
+    // Clamp deltaTime to prevent physics instability
+    if (deltaTime <= 0 || deltaTime > MAX_DELTA_TIME) {
+      deltaTime = 0.016; // Fallback to ~60fps
+    }
     
     // Calculate velocity: v = (x - x_prev) / dt
     this.tempVector1.copy(this.model.position);
