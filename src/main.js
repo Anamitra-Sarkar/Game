@@ -66,6 +66,14 @@ async function init() {
 
     loadingOverlay.classList.add('hidden');
     
+    // Fade out controls info after 8 seconds
+    const controlsInfo = document.getElementById('controls-info');
+    if (controlsInfo) {
+      setTimeout(() => {
+        controlsInfo.classList.add('hidden');
+      }, 8000);
+    }
+    
     // Expose game systems for debugging/testing
     window.gameDebug = {
       inputManager,
