@@ -165,24 +165,25 @@ export class SecondaryMotionController {
     const clothBones = [];
     const upperBodyBones = [];
     
+    // Keywords for bone detection
+    const hairKeywords = ['hair', 'ponytail', 'braid', 'strand'];
+    const clothKeywords = ['cloth', 'cape', 'skirt', 'scarf', 'ribbon', 'tie'];
+    const upperBodyKeywords = ['spine', 'chest', 'upperchest', 'neck'];
+    
     this.model.traverse((object) => {
       if (object.isBone) {
         const name = object.name.toLowerCase();
         
         // Detect hair bones
-        if (name.includes('hair') || name.includes('ponytail') || 
-            name.includes('braid') || name.includes('strand')) {
+        if (hairKeywords.some(keyword => name.includes(keyword))) {
           hairBones.push(object);
         }
         // Detect cloth/accessory bones
-        else if (name.includes('cloth') || name.includes('cape') || 
-                 name.includes('skirt') || name.includes('scarf') ||
-                 name.includes('ribbon') || name.includes('tie')) {
+        else if (clothKeywords.some(keyword => name.includes(keyword))) {
           clothBones.push(object);
         }
         // Detect upper body bones for soft motion
-        else if (name.includes('spine') || name.includes('chest') ||
-                 name.includes('upperchest') || name.includes('neck')) {
+        else if (upperBodyKeywords.some(keyword => name.includes(keyword))) {
           upperBodyBones.push(object);
         }
       }

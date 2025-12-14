@@ -60,8 +60,8 @@ export class CharacterController {
       // Determine target speed with smooth acceleration
       this.targetSpeed = isSprinting ? RUN_SPEED : WALK_SPEED;
       
-      // Smooth acceleration (ease-in)
-      const acceleration = MOVEMENT_ACCELERATION * deltaTime;
+      // Smooth acceleration (ease-in) with clamped lerp factor
+      const acceleration = Math.min(MOVEMENT_ACCELERATION * deltaTime, 1.0);
       this.currentSpeed = THREE.MathUtils.lerp(this.currentSpeed, this.targetSpeed, acceleration);
       
       // Move character
@@ -82,9 +82,9 @@ export class CharacterController {
       this.currentRotation += clampedRotation;
       this.model.rotation.y = this.currentRotation;
     } else {
-      // Smooth deceleration (ease-out)
+      // Smooth deceleration (ease-out) with clamped lerp factor
       this.targetSpeed = 0;
-      const deceleration = MOVEMENT_DECELERATION * deltaTime;
+      const deceleration = Math.min(MOVEMENT_DECELERATION * deltaTime, 1.0);
       this.currentSpeed = THREE.MathUtils.lerp(this.currentSpeed, this.targetSpeed, deceleration);
       
       // Clamp to zero when very small to avoid jitter

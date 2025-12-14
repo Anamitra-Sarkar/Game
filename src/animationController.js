@@ -173,28 +173,10 @@ export class AnimationController {
     let hasIssues = false;
     
     for (const bone of this.skeleton.bones) {
-      // Check for zero scale
-      if (bone.scale.x === 0 || bone.scale.y === 0 || bone.scale.z === 0) {
-        console.warn(`AnimationController: Bone "${bone.name}" has zero scale:`, bone.scale);
+      const issues = this.validateSingleBone(bone);
+      if (issues.length > 0) {
         hasIssues = true;
-      }
-      
-      // Check for inverted scale
-      if (bone.scale.x < 0 || bone.scale.y < 0 || bone.scale.z < 0) {
-        console.warn(`AnimationController: Bone "${bone.name}" has inverted scale:`, bone.scale);
-        hasIssues = true;
-      }
-      
-      // Check for NaN values
-      if (isNaN(bone.position.x) || isNaN(bone.position.y) || isNaN(bone.position.z)) {
-        console.error(`AnimationController: Bone "${bone.name}" has NaN position`);
-        hasIssues = true;
-      }
-      
-      if (isNaN(bone.quaternion.x) || isNaN(bone.quaternion.y) || 
-          isNaN(bone.quaternion.z) || isNaN(bone.quaternion.w)) {
-        console.error(`AnimationController: Bone "${bone.name}" has NaN quaternion`);
-        hasIssues = true;
+        issues.forEach(issue => console.warn(issue));
       }
     }
     
@@ -203,6 +185,36 @@ export class AnimationController {
     } else {
       console.warn('AnimationController: ⚠ Skeleton validation found issues - check warnings above');
     }
+  }
+  
+  /**
+   * Validate a single bone and return array of issue messages
+   */
+  validateSingleBone(bone) {
+    const issues = [];
+    
+    // Check for zero scale
+    if (bone.scale.x === 0 || bone.scale.y === 0 || bone.scale.z === 0) {
+      issues.push(`AnimationController: Bone "${bone.name}" has zero scale: (${bone.scale.x}, ${bone.scale.y}, ${bone.scale.z})`);
+    }
+    
+    // Check for inverted scale
+    if (bone.scale.x < 0 || bone.scale.y < 0 || bone.scale.z < 0) {
+      issues.push(`AnimationController: Bone "${bone.name}" has inverted scale: (${bone.scale.x}, ${bone.scale.y}, ${bone.scale.z})`);
+    }
+    
+    // Check for NaN values in position
+    if (isNaN(bone.position.x) || isNaN(bone.position.y) || isNaN(bone.position.z)) {
+      issues.push(`AnimationController: Bone "${bone.name}" has NaN position`);
+    }
+    
+    // Check for NaN values in quaternion
+    if (isNaN(bone.quaternion.x) || isNaN(bone.quaternion.y) || 
+        isNaN(bone.quaternion.z) || isNaN(bone.quaternion.w)) {
+      issues.push(`AnimationController: Bone "${bone.name}" has NaN quaternion`);
+    }
+    
+    return issues;
   }
   
   /**
@@ -314,12 +326,12 @@ export class AnimationController {
    * Apply procedural bone offsets for added realism
    */
   applyProceduralOffsets(speed, deltaTime) {
-    if (!this.skeleton) return;
+    if (!this.skeleton || deltaTime <= 0) return;
     
     // Calculate character rotation velocity
     const currentRotation = this.model.rotation.y;
     const rotationDelta = currentRotation - this.previousRotation;
-    this.rotationVelocity = rotationDelta / (deltaTime || 0.016);
+    this.rotationVelocity = rotationDelta / deltaTime;
     this.previousRotation = currentRotation;
     
     // Apply upper body inertia (counter-rotation on turns)
