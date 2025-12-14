@@ -37,6 +37,9 @@ export async function setupLighting(scene, renderer) {
   addFillLight(scene);
   addRimLight(scene);
   
+  // Set the environment map as the scene background for visual consistency
+  scene.background = scene.environment;
+  
   return scene;
 }
 
