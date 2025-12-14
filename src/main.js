@@ -81,6 +81,7 @@ async function init() {
       inputManager,
       characterController,
       gameCamera,
+      animationController: characterController?.animationController,
       model,
       scene,
       camera
