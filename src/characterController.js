@@ -172,15 +172,12 @@ export class CharacterController {
   }
   
   /**
-   * Calculate shortest angle between two angles
+   * Calculate shortest angle between two angles using efficient modulo
    */
   shortestAngle(current, target) {
     let delta = target - current;
-    
-    // Normalize to -PI to PI range
-    while (delta > Math.PI) delta -= Math.PI * 2;
-    while (delta < -Math.PI) delta += Math.PI * 2;
-    
+    // Normalize to -PI to PI range using modulo
+    delta = ((delta + Math.PI) % (Math.PI * 2)) - Math.PI;
     return delta;
   }
   

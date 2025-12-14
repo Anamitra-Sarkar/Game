@@ -86,11 +86,6 @@ export class GameCamera {
       Math.max(this.target.position.y + offsetY, MIN_CAMERA_HEIGHT),
       this.target.position.z + offsetZ
     );
-    
-    // Ensure camera never goes below ground
-    if (this.desiredPosition.y < MIN_CAMERA_HEIGHT) {
-      this.desiredPosition.y = MIN_CAMERA_HEIGHT;
-    }
   }
   
   /**

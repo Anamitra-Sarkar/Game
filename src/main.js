@@ -8,6 +8,7 @@ import { GameCamera } from './gameCamera.js';
 import { createWorld } from './world.js';
 
 const MODEL_PATH = '/model.glb';
+const CONTROLS_INFO_FADE_DELAY = 8000;
 
 const tempVector1 = new THREE.Vector3();
 const tempVector2 = new THREE.Vector3();
@@ -66,12 +67,12 @@ async function init() {
 
     loadingOverlay.classList.add('hidden');
     
-    // Fade out controls info after 8 seconds
+    // Fade out controls info after delay
     const controlsInfo = document.getElementById('controls-info');
     if (controlsInfo) {
       setTimeout(() => {
         controlsInfo.classList.add('hidden');
-      }, 8000);
+      }, CONTROLS_INFO_FADE_DELAY);
     }
     
     // Expose game systems for debugging/testing
