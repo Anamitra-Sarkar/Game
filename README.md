@@ -19,15 +19,16 @@ Open the browser preview. Click to lock mouse cursor, then use WASD to move and 
 - **Mouse** - Rotate camera around character
 - **ESC** - Release camera control
 
-## What's New - Third-Person Game Prototype
+## What's New - Advanced Character Animation System
 
-This is now a **playable game prototype** with the following features:
+This is now a **playable game prototype** with **game-quality character animation**, featuring:
 
 ### Character Movement
 - Frame-rate independent movement system
 - Camera-relative controls (WASD moves based on camera direction)
-- Character rotates smoothly to face movement direction
-- Walk and sprint speeds with smooth transitions
+- **Smooth acceleration and deceleration (ease-in/ease-out)**
+- **Polished rotation with angular smoothing (no snapping)**
+- Walk and sprint speeds with continuous transitions
 
 ### Third-Person Camera
 - Smooth follow camera with lerp interpolation
@@ -36,11 +37,29 @@ This is now a **playable game prototype** with the following features:
 - Never goes below ground level
 - Pointer lock for immersive camera control
 
-### Animation System
+### Advanced Animation System 🆕
+- **Skeletal validation with bone hierarchy logging**
 - Automatic animation detection and state management
 - Three animation states: Idle, Walk, Run
-- Smooth transitions between animation states based on movement speed
-- Graceful fallback for models without animations
+- **Animation speed scales with movement velocity**
+- Smooth crossfade transitions between states (0.25s)
+- Graceful fallback chain for models without animations
+
+### Secondary Motion System 🆕
+- **Physics-based secondary motion using spring-damper math**
+- **Hair sway** - Auto-detected hair bones react to movement
+- **Cloth/accessory sway** - Capes, scarves, ribbons move naturally
+- **Upper body soft motion** - Spine and chest have subtle lag
+- Frame-rate independent physics (uses deltaTime)
+- Displacement clamping prevents instability
+- No physics engine required (lightweight spring-damper implementation)
+
+### Procedural Animation Layer 🆕
+- **Upper body inertia** - Counter-rotation on turns
+- **Head follow-through** - Slight lag when changing direction
+- **Shoulder lag** - Subtle movement on direction changes
+- Additive layer that sits on top of keyframed animation
+- Never overrides base animation (non-destructive)
 
 ### World & Ground Alignment
 - Ground plane fixed at y = 0 (horizontal)
@@ -53,9 +72,11 @@ This is now a **playable game prototype** with the following features:
 ### Modular Architecture
 - **input.js** - Keyboard and mouse input handling
 - **characterController.js** - Character movement, rotation, and animation logic
+- **animationController.js** - Animation state machine, skeletal validation, procedural offsets
+- **secondaryMotion.js** - Spring-damper physics for hair/cloth/body
 - **gameCamera.js** - Third-person camera system
 - **world.js** - Ground plane and fog setup
-- Clean separation of concerns for future extensibility
+- Clean separation of concerns: Input → Movement → Animation → Secondary Motion
 
 ## Architecture
 
@@ -199,6 +220,23 @@ For best results, models should use:
 - **Embedded textures** or correct relative paths
 - **Proper UV mapping** for textured surfaces
 
+### Animation Requirements
+
+For full animation system features:
+- **Rigged skeleton** with bones (hips, spine, chest, neck, head, arms, legs)
+- **Named bones** following common conventions (e.g., "Spine", "Head", "LeftShoulder")
+- **Animation clips** named: "idle", "walk", "run" (or similar)
+- **Optional**: Hair/cloth bones with names like "Hair", "Ponytail", "Cape", "Scarf"
+
+### Secondary Motion Bone Detection
+
+The system auto-detects bones for secondary motion based on names:
+- **Hair**: "hair", "ponytail", "braid", "strand"
+- **Cloth**: "cloth", "cape", "skirt", "scarf", "ribbon", "tie"
+- **Upper Body**: "spine", "chest", "upperchest", "neck"
+
+Name your bones accordingly to enable automatic physics simulation.
+
 ## Replacing the HDRI
 
 1. Download an HDR environment map (Poly Haven, HDRI Haven, etc.)
@@ -207,6 +245,49 @@ For best results, models should use:
 
 If no HDRI is provided, a procedural gradient environment is used as fallback.
 
+## Advanced Animation System Details
+
+### Skeletal Validation
+On model load, the system:
+- Discovers and validates the skeleton
+- Logs complete bone hierarchy with scale information
+- Checks for common issues (zero scale, inverted scale, NaN values)
+- Finds key bones for procedural animation (spine, chest, head, shoulders)
+
+### Secondary Motion Physics
+Uses lightweight spring-damper equations without a physics engine:
+```
+F = -kx - cv
+```
+Where:
+- `k` = spring stiffness (15.0 default)
+- `c` = damping coefficient (0.8 default)
+- `x` = displacement from rest position
+- `v` = velocity
+
+**Features:**
+- Frame-rate independent (uses deltaTime)
+- Driven by character velocity and acceleration
+- Displacement clamping prevents instability
+- Per-bone-type configuration (hair, cloth, upper body)
+
+### Procedural Offsets
+Applied after base animation, before secondary motion:
+- **Upper Body Inertia** (0.1 factor): Counter-rotation when turning
+- **Head Lag** (0.15 factor): Slight delay following body rotation
+- **Shoulder Lag** (0.08 factor): Subtle asymmetric movement on turns
+
+### Movement Polish
+**Smooth Rotation:**
+- Angular interpolation using shortest path
+- Smoothing factor (0.15) prevents snapping
+- Speed-limited to feel natural
+
+**Acceleration/Deceleration:**
+- Ease-in on start (8.0 units/s²)
+- Ease-out on stop (12.0 units/s² - faster than acceleration)
+- Prevents instant speed changes
+
 ## Game-Ready Features & Future Hooks
 
 ### Implemented
@@ -214,12 +295,19 @@ If no HDRI is provided, a procedural gradient environment is used as fallback.
 - ✅ Sprint functionality (Shift key)
 - ✅ Third-person camera with mouse look
 - ✅ Animation state machine (idle/walk/run)
+- ✅ Skeletal validation and bone hierarchy logging
+- ✅ Secondary motion system (hair/cloth/body physics)
+- ✅ Procedural animation layer (inertia, lag, follow-through)
+- ✅ Smooth movement feel (acceleration/deceleration/rotation)
 - ✅ Proper ground alignment at y=0
 - ✅ Distance fog and edge blending
 - ✅ Frame-rate independent updates
 
 ### Ready for Future Implementation
-- Hooks for physics engine integration
+- Hooks for full physics engine integration
+- IK (Inverse Kinematics) for foot placement
+- Facial animation system
+- Blend spaces for more animation states
 - NPC spawning and management
 - Interaction system (prepared in architecture)
 - Additional game mechanics
@@ -228,12 +316,33 @@ If no HDRI is provided, a procedural gradient environment is used as fallback.
 ### Debug Interface
 Access game systems via browser console:
 ```javascript
-window.gameDebug.inputManager         // Input system
-window.gameDebug.characterController  // Character controller
-window.gameDebug.gameCamera          // Camera system
-window.gameDebug.model               // Character model
-window.gameDebug.scene               // Three.js scene
-window.gameDebug.camera              // Three.js camera
+window.gameDebug.inputManager          // Input system
+window.gameDebug.characterController   // Character controller
+window.gameDebug.animationController   // Animation state machine
+window.gameDebug.secondaryMotion       // Secondary motion physics system
+window.gameDebug.skeleton              // Skeleton with all bones
+window.gameDebug.gameCamera            // Camera system
+window.gameDebug.model                 // Character model
+window.gameDebug.scene                 // Three.js scene
+window.gameDebug.camera                // Three.js camera
+```
+
+**Example debugging commands:**
+```javascript
+// Check secondary motion stats
+window.gameDebug.secondaryMotion.getStats()
+
+// Get animation state
+window.gameDebug.animationController.getCurrentState()
+
+// List all bones
+window.gameDebug.skeleton.bones.map(b => b.name)
+
+// Get key bones
+window.gameDebug.animationController.getKeyBones()
+
+// Manually set animation speed
+window.gameDebug.animationController.setAnimationSpeed(0.5)
 ```
 
 ## Known Limitations
