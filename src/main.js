@@ -82,6 +82,8 @@ async function init() {
       characterController,
       gameCamera,
       animationController: characterController?.animationController,
+      secondaryMotion: characterController?.animationController?.getSecondaryMotion(),
+      skeleton: characterController?.animationController?.getSkeleton(),
       model,
       scene,
       camera
